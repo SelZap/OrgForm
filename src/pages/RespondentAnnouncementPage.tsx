@@ -9,7 +9,7 @@ import { Role } from "../types";
 import { Megaphone, Mail, Bell, ShieldPlus, Send, RefreshCw, Layers, CheckCircle } from "lucide-react";
 
 export const RespondentAnnouncementPage: React.FC = () => {
-  const { activeFormId, currentUser, showNotification } = useApp();
+  const { activeFormId, currentUser, showNotification, navigate } = useApp();
 
   const [form, setForm] = useState<any | null>(null);
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -118,7 +118,6 @@ export const RespondentAnnouncementPage: React.FC = () => {
   };
 
   const isManagementPrivilege = [Role.FACILITATOR, Role.LEAD].includes(currentUser.role);
-  const { navigate } = useApp();
 
   return (
     <div className="max-w-7xl mx-auto space-y-6 text-left font-sans">

@@ -40,7 +40,11 @@ function initDatabase() {
   if (fs.existsSync(DB_FILE)) {
     try {
       const dbContent = fs.readFileSync(DB_FILE, "utf-8");
-      return JSON.parse(dbContent);
+      const parsed = JSON.parse(dbContent);
+      if (!parsed.acceptedRespondents) {
+        parsed.acceptedRespondents = [];
+      }
+      return parsed;
     } catch (e) {
       console.error("Error reading db.json, resetting...", e);
     }
@@ -52,7 +56,8 @@ function initDatabase() {
       { id: "usr_lead", email: "lead@orgform.edu", name: "Elena Rostova", role: "LEAD", status: "ACTIVE" },
       { id: "usr_creator", email: "creator@orgform.edu", name: "Marcus Broadus", role: "CREATOR", status: "ACTIVE" },
       { id: "usr_facilitator", email: "facilitator@orgform.edu", name: "Sarah Jenkins", role: "FACILITATOR", status: "ACTIVE" },
-      { id: "usr_creator2", email: "collaborator@orgform.edu", name: "Kenji Tanaka", role: "CREATOR", status: "ACTIVE" }
+      { id: "usr_creator2", email: "collaborator@orgform.edu", name: "Kenji Tanaka", role: "CREATOR", status: "ACTIVE" },
+      { id: "usr_member", email: "member@orgform.edu", name: "Rin Shima", role: "MEMBER", status: "ACTIVE" }
     ],
     orgInfo: {
       id: "org_default",
@@ -222,7 +227,8 @@ function initDatabase() {
         message: "Check out Web3 & AI Tech Symposium Registration: Register for our annual tech symposium. Includes workshops on Generative AI and Smart Contracts. Public Form.",
         timestamp: new Date().toISOString()
       }
-    ]
+    ],
+    acceptedRespondents: []
   };
 
   fs.writeFileSync(DB_FILE, JSON.stringify(defaultDb, null, 2), "utf-8");
@@ -615,7 +621,7 @@ app.get("/api/posts", (req, res) => {
   res.json(db.posts);
 });
 
-app.post("/api/posts", authorizeRole(["CREATOR", "FACILITATOR", "LEAD"]), (req, res) => {
+app.post("/api/posts", authorizeRole(["CREATOR", "FACILITATOR", "LEAD", "MEMBER"]), (req, res) => {
   const { title, content, category, attachedFormId } = req.body;
   if (!title || !content || !category) {
     return res.status(400).json({ error: "Missing required post fields." });
@@ -646,6 +652,72 @@ app.get("/api/forms/:id/responses", authorizeRole(["FACILITATOR", "LEAD"]), (req
   // Access validation: ONLY Facilitator or Leads can query responses!
   const results = db.responses.filter((r: any) => r.formId === req.params.id);
   res.json(results);
+});
+
+// Accepted Respondents Database management endpoints
+app.get("/api/forms/:id/accepted-respondents", authorizeRole(["FACILITATOR", "LEAD"]), (req, res) => {
+  if (!db.acceptedRespondents) {
+    db.acceptedRespondents = [];
+  }
+  const results = db.acceptedRespondents.filter((ar: any) => ar.formId === req.params.id);
+  res.json(results);
+});
+
+app.post("/api/forms/:id/accepted-respondents", authorizeRole(["FACILITATOR", "LEAD"]), (req, res) => {
+  if (!db.acceptedRespondents) {
+    db.acceptedRespondents = [];
+  }
+  const form = db.forms.find((f: any) => f.id === req.params.id);
+  if (!form) return res.status(404).json({ error: "Form not found" });
+
+  const { responseId, respondentEmail, answers } = req.body;
+  if (!responseId) {
+    return res.status(400).json({ error: "Missing required parameter responseId." });
+  }
+
+  // Check if already in accepted database
+  const exists = db.acceptedRespondents.some(
+    (ar: any) => ar.formId === req.params.id && ar.responseId === responseId
+  );
+
+  if (exists) {
+    return res.status(400).json({ error: "Respondent is already registered in the accepted database." });
+  }
+
+  const newAccepted = {
+    id: "acc_" + Math.random().toString(36).substring(2, 9),
+    formId: req.params.id,
+    responseId,
+    respondentEmail,
+    answers: answers || {},
+    addedAt: new Date().toISOString(),
+    addedBy: req.body._userName
+  };
+
+  db.acceptedRespondents.push(newAccepted);
+  saveDb();
+
+  // Send simulated status notification email to the accepted respondent
+  if (respondentEmail) {
+    sendSimulatedEmail(
+      respondentEmail,
+      `Registration Status UPDATE: ACCEPTED to ${form.title}`,
+      `Dear ${respondentEmail.split("@")[0] || "Participant"},\n\nWe are absolutely pleased to inform you that your registration submission for "${form.title}" has been reviewed by our Form Facilitators and has been officially ACCEPTED into our database.\n\nKeep an eye on the form active feed website / bulletin for upcoming announcements!\n\nBest regards,\n${db.orgInfo.name} Core Team`
+    );
+  }
+
+  res.status(201).json(newAccepted);
+});
+
+app.delete("/api/forms/:id/accepted-respondents/:responseId", authorizeRole(["FACILITATOR", "LEAD"]), (req, res) => {
+  if (!db.acceptedRespondents) {
+    db.acceptedRespondents = [];
+  }
+  db.acceptedRespondents = db.acceptedRespondents.filter(
+    (ar: any) => !(ar.formId === req.params.id && ar.responseId === req.params.responseId)
+  );
+  saveDb();
+  res.json({ success: true });
 });
 
 // Save respondent submission (No account required!)

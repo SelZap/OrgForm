@@ -34,20 +34,25 @@ export const MockInbox: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mt-8 font-sans">
+    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm mt-8 font-sans">
       {/* Header */}
-      <div className="bg-gray-50 px-5 py-3.5 border-b border-gray-200 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Layers className="w-4 h-4 text-gray-500" />
-          <h3 className="text-xs font-bold text-gray-950 tracking-tight uppercase">External Integration Sandbox Monitor</h3>
-          <span className="bg-gray-100 text-gray-600 text-[9px] px-2 py-0.5 rounded border border-gray-200 flex items-center gap-1 font-mono font-bold uppercase tracking-wider">
-            <ShieldCheck className="w-2.5 h-2.5 text-gray-500" /> Simulation Lab
-          </span>
+      <div className="bg-gray-50/50 px-5 py-4 border-b border-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-indigo-600" />
+            <h3 className="text-xs font-bold text-gray-950 tracking-tight uppercase">Simulated SMTP Mail & Bulletin Feeds</h3>
+            <span className="bg-indigo-50 text-indigo-700 text-[9px] px-2 py-0.5 rounded-full border border-indigo-150 flex items-center gap-1 font-mono font-bold uppercase tracking-wider">
+              <ShieldCheck className="w-2.5 h-2.5 text-indigo-600" /> Simulation Lab
+            </span>
+          </div>
+          <p className="text-[10px] text-gray-400 font-medium">
+            When you invite members, approve form proposals, or publish updates, simulated emails and board notifications logs display instantly below.
+          </p>
         </div>
         <button
           onClick={fetchLogs}
           disabled={isRefreshing}
-          className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded transition-transform"
+          className="p-1.5 text-gray-400 hover:text-black hover:bg-gray-100 rounded-lg transition-transform cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? "animate-spin" : ""}`} />
         </button>

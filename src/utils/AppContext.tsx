@@ -48,7 +48,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [posts, setPosts] = useState<Post[]>([]);
   
   // Custom router
-  const [activeRoute, setActiveRoute] = useState<string>("dashboard");
+  const [activeRoute, setActiveRoute] = useState<string>("login");
   const [activeFormId, setActiveFormId] = useState<string | null>(null);
 
   const [globalNotification, setGlobalNotification] = useState<{

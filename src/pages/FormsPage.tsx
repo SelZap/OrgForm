@@ -230,9 +230,11 @@ export const FormsPage: React.FC = () => {
   const copyRespondentLink = (formId: string) => {
     const origin = window.location.origin;
     // Direct link to respondent page
-    const link = `https://ais-dev-4odtuizuaz7n2knhi667qc-755012508456.asia-southeast1.run.app/respond/${formId}`;
-    navigator.clipboard.writeText(link);
-    showNotification("success", "Respondent shareable link copied successfully!");
+    const link = `${origin}/#respond-${formId}`; // Or custom SPA safe anchor
+    // To make sure they can navigate, let's give them a clean workspace link
+    const absoluteLink = `${origin}/?formId=${formId}`;
+    navigator.clipboard.writeText(absoluteLink);
+    showNotification("success", "Respondent workspace share link copied dynamically!");
   };
 
   // Status badges decoration helper
@@ -285,17 +287,17 @@ export const FormsPage: React.FC = () => {
           </div>
 
           {/* Status filter selection tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 bg-gray-50 p-1.5 rounded border border-gray-200">
+          <div className="flex flex-wrap items-center gap-1.5 bg-indigo-50/20 p-1.5 rounded-full border border-indigo-100/60 max-w-max">
             {["All", "Drafts", "In Review", "Required Revision", "Published", "Rejected"].map((tab) => {
               const isActive = statusFilter === tab;
               return (
                 <button
                   key={tab}
                   onClick={() => setStatusFilter(tab)}
-                  className={`px-3 py-1 text-xs font-semibold rounded cursor-pointer transition-all ${
+                  className={`px-3.5 py-1 text-xs font-bold rounded-full cursor-pointer transition-all ${
                     isActive
-                      ? "bg-black text-white shadow-xs"
-                      : "text-gray-600 hover:bg-gray-200 hover:text-black"
+                      ? "bg-indigo-605 bg-indigo-600 text-white shadow-2xs"
+                      : "text-gray-500 hover:bg-indigo-50/50 hover:text-indigo-950"
                   }`}
                 >
                   {tab}
@@ -325,7 +327,7 @@ export const FormsPage: React.FC = () => {
               const canInvite = isCreator && [FormStatus.DRAFT, FormStatus.REVISION_PENDING].includes(form.status);
 
               return (
-                <div key={form.id} className="bg-white border border-gray-200 rounded p-5 hover:border-gray-400 transition-colors flex flex-col justify-between shadow-sm">
+                <div key={form.id} className="bg-white border border-gray-200 rounded-2xl p-5 hover:border-indigo-400 hover:shadow-xs transition-all flex flex-col justify-between shadow-2xs">
                   <div>
                     <div className="flex items-center justify-between gap-2.5 mb-3">
                       {renderStatusBadge(form.status)}
@@ -334,12 +336,12 @@ export const FormsPage: React.FC = () => {
                       </span>
                     </div>
 
-                    <h3 className="text-sm font-bold text-gray-900 line-clamp-1">{form.title}</h3>
+                    <h3 className="text-sm font-bold text-gray-950 line-clamp-1">{form.title}</h3>
                     <p className="text-xs text-gray-500 mt-1.5 leading-relaxed line-clamp-2">{form.description}</p>
 
-                    <div className="mt-4 pt-3 border-t border-gray-100 text-[10px] font-mono flex items-center justify-between text-gray-400">
-                      <span>Created by: <span className="text-gray-700 font-semibold">{form.creatorName}</span></span>
-                      <span>{form.isPublic ? "PUBLIC API" : "PRIVATE LOCAL"}</span>
+                    <div className="mt-4 pt-3 border-t border-gray-100 text-[10px] font-mono flex items-center justify-between text-gray-450">
+                      <span>Created by: <span className="text-indigo-950 font-bold">{form.creatorName}</span></span>
+                      <span className="text-indigo-650 bg-indigo-50 px-1.5 py-0.2 rounded-full font-bold text-[8.5px] tracking-wider border border-indigo-100 uppercase">{form.isPublic ? "PUBLIC FEED" : "PRIVATE HUB"}</span>
                     </div>
 
                     {/* Displays collaborator count */}
@@ -352,8 +354,8 @@ export const FormsPage: React.FC = () => {
 
                     {/* Comments block display if present */}
                     {form.comments && form.comments.length > 0 && (
-                      <div className="mt-3 bg-amber-50/70 border border-amber-200 p-2.5 rounded text-left space-y-1">
-                        <span className="text-[9px] font-bold text-amber-800 font-mono uppercase block">Latest Review Feedback:</span>
+                      <div className="mt-3 bg-indigo-50/40 border border-indigo-150 p-3 rounded-xl text-left space-y-1">
+                        <span className="text-[9px] font-extrabold text-indigo-900 font-mono uppercase block">Latest Review Feedback:</span>
                         {form.comments.slice(-2).map((com) => (
                           <div key={com.id} className="text-[10px] text-gray-700 font-sans leading-normal">
                             <span className="font-semibold text-gray-900">{com.authorName} ({com.authorRole}):</span> {com.text}
@@ -532,9 +534,9 @@ export const FormsPage: React.FC = () => {
             </div>
             <button
               onClick={() => setIsCreating(false)}
-              className="text-xs font-semibold text-gray-500 hover:text-black cursor-pointer"
+              className="px-3.5 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 hover:text-black rounded-xl text-xs font-bold transition-all shadow-3xs cursor-pointer flex items-center gap-1.5"
             >
-              Discard & Return
+              ← Cancel & Return to Database
             </button>
           </div>
 
@@ -630,9 +632,9 @@ export const FormsPage: React.FC = () => {
             </div>
             <button
               onClick={() => setEditingForm(null)}
-              className="text-xs font-semibold text-gray-500 hover:text-black cursor-pointer"
+              className="px-3.5 py-1.5 bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 hover:text-black rounded-xl text-xs font-bold transition-all shadow-3xs cursor-pointer flex items-center gap-1.5"
             >
-              Discard Changes
+              ← Discard & Return to Database
             </button>
           </div>
 

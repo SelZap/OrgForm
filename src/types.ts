@@ -7,6 +7,7 @@ export enum Role {
   CREATOR = "CREATOR",         // Form Creator
   FACILITATOR = "FACILITATOR", // Form Facilitator
   LEAD = "LEAD",               // Lead Member
+  MEMBER = "MEMBER",           // Student Organization Member (Dashboard and make post page only)
 }
 
 export enum PostCategory {
